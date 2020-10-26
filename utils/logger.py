@@ -1,0 +1,3 @@
+"""
+Logger class definition.
+"""
