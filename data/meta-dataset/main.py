@@ -81,5 +81,5 @@ if __name__ == '__main__':
     val_metadataset = OmniglotLoader(val_alphabets, 32, k_shot=K_SHOT)
     test_metadataset = OmniglotLoader(test_alphabets, 32, k_shot=K_SHOT)
 
-    train_steps = 500
+    train_steps = 2000
     mn_net, mn_train_accuracies, mn_val_accuracies = train(Network(distance_function=mahalanobis_distance), train_metadataset, train_steps)
