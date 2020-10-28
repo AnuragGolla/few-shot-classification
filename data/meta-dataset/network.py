@@ -4,8 +4,10 @@ import torch.nn.functional as F
 # os.environ['CUDA_VISIBLE_DEVICES'] = '0' # Feel free to change for those with GPUs
 
 from distance import euclidean_distance
+import pdb
 
-device = 'cuda'
+
+device = 'cpu'
 
 
 def conv_block(in_depth, out_depth, pool_size=1):
@@ -90,6 +92,11 @@ class Network(nn.Module):
         ce_loss = torch.nn.CrossEntropyLoss()
         loss = ce_loss(dist, labels)
         _, y_hat = torch.max(logit, -1)
+
+        # print(y_hat[0])
+        # print(labels[0])
+
+        # pdb.set_trace()
         
         accuracy = torch.eq(y_hat, labels).float().mean()
                         

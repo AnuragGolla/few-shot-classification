@@ -5,10 +5,10 @@ import pdb
 import os
 import torch
 import tqdm
-from distance import euclidean_distance, mahalanobis_distance
+from distance import euclidean_distance, mahalanobis_distance, kl_distance
 
-K_SHOT = 5
-device = 'cuda'
+K_SHOT = 2
+device = 'cpu'
 
 def from_torch(x):
     """
@@ -82,4 +82,4 @@ if __name__ == '__main__':
     test_metadataset = OmniglotLoader(test_alphabets, 32, k_shot=K_SHOT)
 
     train_steps = 2000
-    mn_net, mn_train_accuracies, mn_val_accuracies = train(Network(distance_function=mahalanobis_distance), train_metadataset, train_steps)
+    mn_net, mn_train_accuracies, mn_val_accuracies = train(Network(distance_function=kl_distance), train_metadataset, train_steps)

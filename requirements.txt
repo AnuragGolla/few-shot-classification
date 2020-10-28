@@ -2,4 +2,3 @@ scikit-image
 numpy
 tqdm
 torch
-pdb
