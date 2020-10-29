@@ -18,8 +18,8 @@ def mahalanobis_distance(support, support_mean, query, beta=1):
         # suport: 64, 5, 15, 64
 
         within_class_diff = support - support_mean.unsqueeze(2) # 64, 5, 15, 64
-        within_class_diff = within_class_diff.view(B, -1, Depth) # 64, 5 * 15,  64
-        sigma_kt = 1/(Shot - 1) * torch.bmm(torch.transpose(within_class_diff, -2, -1), within_class_diff) # 64, 64, 64
+        within_class_diff = within_class_diff.view(B*C, Shot, Depth) # 64, 5 * 15,  64
+        sigma_kt = 1/(Shot - 1) * torch.bmm(torch.transpose(within_class_diff, -2, -1), within_class_diff) # 320, 64, 64 --> 64, 5, 64, 64
 
 
         # print("sigma kt : ", sigma_kt.shape)
@@ -27,13 +27,13 @@ def mahalanobis_distance(support, support_mean, query, beta=1):
 
         between_class_diff = support.view(B,-1,Depth) -  torch.mean(support_mean, 1, keepdim=True)  # 64, 75, 64
         between_class_diff = torch.transpose(between_class_diff, -2, -1) # 64, 64, 75
-        sigma_t = 1//(C*Shot) * torch.bmm(between_class_diff, torch.transpose(between_class_diff, -2, -1)) # 64, 64, 64
+        sigma_t = 1/(C*Shot) * torch.bmm(between_class_diff, torch.transpose(between_class_diff, -2, -1)) # 64, 64, 64
 
         # print("sigma_t: ", sigma_t.shape)
 
         lambda_kt = (Shot)/(Shot - 1)
 
-        covariance_matrix = lambda_kt * sigma_kt + (1 - lambda_kt) * sigma_t + beta * torch.eye(Depth, Depth) # 64, 64, 64
+        covariance_matrix = lambda_kt * sigma_kt + (1 - lambda_kt) * sigma_t.unsqueeze(1) + beta * torch.eye(Depth).view(1, 1, Depth, Depth) # 64, 5, 64, 64
 
         # print("cov: ", covariance_matrix.shape)
 
@@ -41,9 +41,11 @@ def mahalanobis_distance(support, support_mean, query, beta=1):
         # print(covariance_matrix)
         # pdb.set_trace()
 
-        first_half =  torch.bmm(query - support_mean, torch.inverse(covariance_matrix)) # 64, 5, 64
+        covariance_matrix = covariance_matrix.view(B*C, Depth, Depth)
+
+        first_half = torch.bmm((query - support_mean).view(B*C, -1, Depth), torch.inverse(covariance_matrix)) # 320, 1, 64
         second_half = torch.transpose(query - support_mean, -2, -1) # 64, 64, 5
-        a = 1/2 * torch.bmm(first_half, second_half)
+        a = 1/2 * torch.bmm(first_half.view(B,C,Depth), second_half) # 64, 5, 5
 
         return -a
 

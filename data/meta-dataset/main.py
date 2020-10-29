@@ -4,10 +4,16 @@ from network import Network
 import pdb
 import os
 import torch
+from torch.utils.data import DataLoader
 import tqdm
 from distance import euclidean_distance, mahalanobis_distance, kl_distance
 
+import learn2learn as l2l
+from learn2learn.data.transforms import NWays, KShots, LoadData, RemapLabels
+
+
 K_SHOT = 2
+N_WAY = 5
 device = 'cpu'
 
 def from_torch(x):
@@ -25,6 +31,7 @@ def train(net, train_metadataset, num_steps):
     
     return: the trained net, the training accuracies per step, and the validation accuracies per 100 steps
     """
+    print(type(train_metadataset))
     net = net.to(device)
     
 
@@ -74,12 +81,51 @@ def evaluate(net, metadataset, N_way=5):
     return loss, accuracy
 
 if __name__ == '__main__':
-    train_alphabets, val_alphabets, test_alphabets = preprocess('omniglot')
-    # We use a batch size of 64 while training
-    train_metadataset = OmniglotLoader(train_alphabets, 32, k_shot=K_SHOT, augment_rotate=True, augment_flip=True)
-    # We can use a batch size of 1600 for validation or testing
-    val_metadataset = OmniglotLoader(val_alphabets, 32, k_shot=K_SHOT)
-    test_metadataset = OmniglotLoader(test_alphabets, 32, k_shot=K_SHOT)
+#    train_alphabets, val_alphabets, test_alphabets = preprocess('omniglot')
+#    # We use a batch size of 64 while training
+#    train_metadataset = OmniglotLoader(train_alphabets, 32, k_shot=K_SHOT, augment_rotate=True, augment_flip=True)
+#    # We can use a batch size of 1600 for validation or testing
+#    val_metadataset = OmniglotLoader(val_alphabets, 32, k_shot=K_SHOT)
+#    test_metadataset = OmniglotLoader(test_alphabets, 32, k_shot=K_SHOT)
+
+    path_data = '../miniImageNet/'
+    train_dataset = l2l.vision.datasets.MiniImagenet(root=path_data, mode='train', download=True)
+    valid_dataset = l2l.vision.datasets.MiniImagenet(root=path_data, mode='validation', download=True)
+    test_dataset = l2l.vision.datasets.MiniImagenet(root=path_data, mode='test', download=True)
+
+    train_dataset = l2l.data.MetaDataset(train_dataset)
+    train_transforms = [
+        NWays(train_dataset, N_WAY),
+        KShots(train_dataset, K_SHOT),
+        LoadData(train_dataset),
+        RemapLabels(train_dataset),
+    ]
+    train_tasks = l2l.data.TaskDataset(train_dataset, task_transforms=train_transforms)
+    train_loader = DataLoader(train_tasks, pin_memory=True, shuffle=True)
+
+    valid_dataset = l2l.data.MetaDataset(valid_dataset)
+    valid_transforms = [
+        NWays(valid_dataset, N_WAY),
+        KShots(valid_dataset, K_SHOT),
+        LoadData(valid_dataset),
+        RemapLabels(valid_dataset),
+    ]
+    valid_tasks = l2l.data.TaskDataset(valid_dataset,
+                                       task_transforms=valid_transforms,
+                                       num_tasks=200)
+    valid_loader = DataLoader(valid_tasks, pin_memory=True, shuffle=True)
+
+    test_dataset = l2l.data.MetaDataset(test_dataset)
+    test_transforms = [
+        NWays(test_dataset, N_WAY),
+        KShots(test_dataset, K_SHOT),
+        LoadData(test_dataset),
+        RemapLabels(test_dataset),
+    ]
+    test_tasks = l2l.data.TaskDataset(test_dataset,
+                                      task_transforms=test_transforms,
+                                      num_tasks=2000)
+    test_loader = DataLoader(test_tasks, pin_memory=True, shuffle=True)
 
     train_steps = 2000
-    mn_net, mn_train_accuracies, mn_val_accuracies = train(Network(distance_function=kl_distance), train_metadataset, train_steps)
+    mn_net, mn_train_accuracies, mn_val_accuracies = train(Network(distance_function=euclidean_distance), train_loader, train_steps)
