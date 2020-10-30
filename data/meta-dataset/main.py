@@ -104,7 +104,6 @@ if __name__ == '__main__':
 
     else:
         assert (dataset == 'mini_imagenet')
-        pdb.set_trace()
 
         path_data = '../miniImageNet/'
         train_dataset = l2l.vision.datasets.MiniImagenet(root=path_data, mode='train', download=True)
