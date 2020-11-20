@@ -1,4 +1,0 @@
-"""
-Build networks class definition.
-"""
-

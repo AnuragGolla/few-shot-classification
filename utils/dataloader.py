@@ -1,4 +1,0 @@
-"""
-MetaDataLoader class definition.
-"""
-
