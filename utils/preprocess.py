@@ -26,14 +26,14 @@ def preprocess(dataset):
         num_characters = 1623 # Number of characters in the entire Omniglot
 
     root = '.'
-    data_path = os.path.join(root, os.path.join('data', dataset))
-    cache_path = os.path.join(root, os.path.join('cache', dataset))
+    data_path = os.path.join(root, os.path.join('../data', dataset))
+    cache_path = os.path.join(root, os.path.join('../data/cache', dataset))
     os.makedirs(cache_path, exist_ok=True)
     dataset_path = os.path.join(cache_path, 'dataset.npy')
 
     if os.path.exists(dataset_path): # We've consolidated the data before, just load it in
         alphabets = np.load(dataset_path, allow_pickle=True).item()
-    else: 
+    else:
         image_paths = glob(os.path.join(data_path, 'images_background/*/*/*.png'))
         image_paths.extend(glob(os.path.join(data_path, 'images_evaluation/*/*/*.png')))
 
@@ -43,7 +43,7 @@ def preprocess(dataset):
             *_, alphabet, character, drawing = image_path.split('/')
             # Here we load in images and resize all images to H by W with skimage
             alphabets[alphabet].append(transform.resize(io.imread(image_path), [H, W]))
-        
+
         # Omniglot, with 1623 total classes, is actually divided into 50 variable-sized alphabets
         alphabets = {alphabet: np.stack(images).reshape(-1, num_writers, H, W) for alphabet, images in alphabets.items()}
         np.save(dataset_path, alphabets)

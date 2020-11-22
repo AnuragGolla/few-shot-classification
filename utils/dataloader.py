@@ -29,9 +29,9 @@ class OmniglotLoader:
                 rotate_180 = np.rot90(alphabet_temp, axes=(-2, -1), k=2)
                 rotate_270 = np.rot90(alphabet_temp, axes=(-2, -1), k=3)
                 alphabet_temp = np.concatenate((alphabet_temp, rotate_90, rotate_180, rotate_270))
-            
-            self.data[alphabet] = alphabet_temp            
-    
+
+            self.data[alphabet] = alphabet_temp
+
     def __iter__(self):
         """
         Define this class as an iterable that yields a batch of tasks at each iteration when used in a for-loop.
@@ -47,14 +47,14 @@ class OmniglotLoader:
             batch = []
             for _ in range(self.batch_size):
                 random_alphabet_name = np.random.choice(list(self.data.keys()), size = self.n_way)
-                
+
                 random_chars = [self.data[alphabet][np.random.choice(len(self.data[alphabet]), size=1, replace=False),:,:,:] for alphabet in random_alphabet_name]
                 random_chars = np.concatenate(random_chars, axis=0)
-                
+
                 key_query_index = np.random.choice(random_chars.shape[1], size = self.k_shot + self.q_queryperclass, replace=False)
-                
+
                 supports_queries = random_chars[:,key_query_index,:,:]
-                                
+
                 batch.append(supports_queries)
-                            
+
             yield np.array(batch) # Shape (batch_size, N_way, K_shot + Q_queryperclass, H, W)
