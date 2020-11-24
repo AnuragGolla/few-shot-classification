@@ -13,11 +13,14 @@ from distances.euclidean import euclidean_distance
 from distances.mahalanobis import mahalanobis_distance
 from distances.kullback_leibler import kl_distance
 from preprocess import preprocess
-from dataloader import OmniglotLoader
+from dataloader import OmniglotLoader, MiniImageNetLoader
 from prototypical import ProtoNet
 
 import learn2learn as l2l
 from learn2learn.data.transforms import NWays, KShots, LoadData, RemapLabels
+
+
+QUERY_PER_CLASS = 1
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -96,36 +99,39 @@ if __name__ == '__main__':
         train_dataset = l2l.data.MetaDataset(train_dataset)
         train_transforms = [
             NWays(train_dataset, args.nway),
-            KShots(train_dataset, args.kshot),
+            KShots(train_dataset, args.kshot+QUERY_PER_CLASS),
             LoadData(train_dataset),
             RemapLabels(train_dataset),
         ]
         train_tasks = l2l.data.TaskDataset(train_dataset, task_transforms=train_transforms)
-        train_loader = DataLoader(train_tasks, pin_memory=True, shuffle=True)
 
         valid_dataset = l2l.data.MetaDataset(valid_dataset)
         valid_transforms = [
             NWays(valid_dataset, args.nway),
-            KShots(valid_dataset, args.kshot),
+            KShots(valid_dataset, args.kshot+QUERY_PER_CLASS),
             LoadData(valid_dataset),
             RemapLabels(valid_dataset),
         ]
         valid_tasks = l2l.data.TaskDataset(valid_dataset,
-                                        task_transforms=valid_transforms,
-                                        num_tasks=200)
-        valid_loader = DataLoader(valid_tasks, pin_memory=True, shuffle=True)
+                                        task_transforms=valid_transforms)
 
         test_dataset = l2l.data.MetaDataset(test_dataset)
         test_transforms = [
             NWays(test_dataset, args.nway),
-            KShots(test_dataset, args.kshot),
+            KShots(test_dataset, args.kshot+QUERY_PER_CLASS),
             LoadData(test_dataset),
             RemapLabels(test_dataset),
         ]
         test_tasks = l2l.data.TaskDataset(test_dataset,
-                                        task_transforms=test_transforms,
-                                        num_tasks=2000)
-        test_loader = DataLoader(test_tasks, pin_memory=True, shuffle=True)
+                                        task_transforms=test_transforms)
+
+        train_loader = MiniImageNetLoader(train_tasks, args.train_bsz, args.kshot+QUERY_PER_CLASS, args.nway)
+        val_loader = MiniImageNetLoader(valid_tasks, args.val_bsz, args.kshot+QUERY_PER_CLASS, args.nway)
+        test_loader = MiniImageNetLoader(test_tasks, args.test_bsz, args.kshot+QUERY_PER_CLASS, args.nway)
+
+        for batch in train_loader:
+            print(batch.shape)
+            raise Exception()
 
     else:
         raise NotImplementedError(f"Dataset {args.dataset} not compatible!")

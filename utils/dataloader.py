@@ -1,5 +1,12 @@
 import numpy as np
 
+
+def from_torch(x):
+    """
+    Convert from a torch tensor to numpy array
+    """
+    return x.detach().cpu().numpy()
+
 class OmniglotLoader:
     def __init__(self, alphabets, batch_size, n_way=5, k_shot=1, q_queryperclass=1, augment_rotate=False, augment_flip=False):
         """
@@ -58,3 +65,24 @@ class OmniglotLoader:
                 batch.append(supports_queries)
 
             yield np.array(batch) # Shape (batch_size, N_way, K_shot + Q_queryperclass, H, W)
+
+class MiniImageNetLoader:
+    def __init__(self, task_set, batch_size, k_shot, n_way):
+        self.task_set = task_set
+        self.batch_size = batch_size
+        self.k_shot = k_shot
+        self.n_way = n_way
+
+        self.channels = 3
+        self.H = 84
+        self.W = 84
+
+    def __iter__(self):
+        while True:
+            batch = []
+            for _ in range(self.batch_size):
+                X, _ = self.task_set.sample()
+                queries = from_torch(X.view(self.n_way, self.k_shot, self.channels, self.H, self.W))
+                batch.append(queries)
+
+            yield np.array(batch)
