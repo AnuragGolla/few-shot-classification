@@ -12,6 +12,7 @@ from torch.utils.data import DataLoader
 from distances.euclidean import euclidean_distance
 from distances.mahalanobis import mahalanobis_distance
 from distances.kullback_leibler import kl_distance
+from distances.earth_mover import emd_distance
 from preprocess import preprocess
 from dataloader import OmniglotLoader, MiniImageNetLoader
 from prototypical import ProtoNet
@@ -129,9 +130,7 @@ if __name__ == '__main__':
         val_loader = MiniImageNetLoader(valid_tasks, args.val_bsz, args.kshot+QUERY_PER_CLASS, args.nway)
         test_loader = MiniImageNetLoader(test_tasks, args.test_bsz, args.kshot+QUERY_PER_CLASS, args.nway)
 
-        for batch in train_loader:
-            print(batch.shape)
-            raise Exception()
+        # NOTE: mini-imagenet has RGB channels (unsupported)
 
     else:
         raise NotImplementedError(f"Dataset {args.dataset} not compatible!")
@@ -142,6 +141,8 @@ if __name__ == '__main__':
         metric = mahalanobis_distance
     elif args.metric == 'kl':
         metric = kl_distance
+    elif args.metric == 'emd':
+        metric = emd_distance
     else:
         raise NotImplementedError(f"Distance metric {args.metric} not compatible!")
 
