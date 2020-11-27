@@ -5,3 +5,4 @@ torch
 learn2learn
 cpython
 POT
+neuralnet-pytorch

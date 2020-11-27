@@ -13,6 +13,7 @@ from distances.euclidean import euclidean_distance
 from distances.mahalanobis import mahalanobis_distance
 from distances.kullback_leibler import kl_distance
 from distances.earth_mover import emd_distance
+from distances.jensen_shannon import js_distance
 from preprocess import preprocess
 from dataloader import OmniglotLoader, MiniImageNetLoader
 from prototypical import ProtoNet
@@ -143,6 +144,8 @@ if __name__ == '__main__':
         metric = kl_distance
     elif args.metric == 'emd':
         metric = emd_distance
+    elif args.metric == "js":
+        metric = js_distance
     else:
         raise NotImplementedError(f"Distance metric {args.metric} not compatible!")
 
