@@ -28,11 +28,11 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', type=str, default='omniglot', help='set dataset')
     parser.add_argument('--epochs', type=int, default=2000, help='set epochs')
-    parser.add_argument('--train_bsz', type=int, default=64, help='set train batch size')
+    parser.add_argument('--train_bsz', type=int, default=32, help='set train batch size')
     parser.add_argument('--val_bsz', type=int, default=1600, help='set validation batch size')
     parser.add_argument('--test_bsz', type=int, default=1600, help='set test batch size')
     parser.add_argument('--device', type=str, default='cpu', help='set device')
-    parser.add_argument('--kshot', type=int, default=6, help='set k_shot')
+    parser.add_argument('--kshot', type=int, default=5, help='set k_shot')
     parser.add_argument('--nway', type=int, default=5, help='set n_way')
     parser.add_argument('--lr', type=float, default=1e-3, help='set learning rate')
     parser.add_argument('--metric', type=str, default='euclidean', help='set distance metric') # mahalanobis, kl
@@ -152,6 +152,9 @@ if __name__ == '__main__':
     print("Training ...")
     mn_net, mn_train_accuracies, mn_val_accuracies = \
         train(ProtoNet(distance_function=metric), train_loader, valid_loader, args)
+
+    mn_test = evaluate(mn_net, test_loader, args)
+    print(mn_test)
 
     print("Training Complete!")
 

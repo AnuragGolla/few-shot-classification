@@ -3,6 +3,7 @@ import numpy as np
 import pdb
 import torch.nn.functional as F
 from scipy.stats import entropy
+from distances.euclidean import euclidean_distance
 
 def mahalanobis_distance(support, support_mean, query, beta=1):
     # class within task covariance matrix

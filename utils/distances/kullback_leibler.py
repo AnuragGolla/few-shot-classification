@@ -4,76 +4,37 @@ import pdb
 import torch.nn.functional as F
 from scipy.stats import entropy
 
-def kl_distance(support, support_mean, query):
-    return F.kl_div(support_mean, query)
-    # print(f"Shapes: {support.shape}, {support_mean.shape}, {query.shape}")
-    # B, C, Shot, Depth = support.shape # 32, 5, 5, 64
+def kl_distance(support, support_mean, query, js=False):
 
-    # # normalize support mean
-    # support_mean_normalized = torch.abs(support_mean) # 32, 5, 64
+    if not js:
+        # normalize support mean
+        support_mean_normalized = torch.abs(support_mean) # 32, 5, 64
+        support_mean_normalized /= torch.sum(support_mean_normalized, -1, keepdim=True) # 32, 5, 64
 
-    # # print("ori supp mean norm: ", torch.sum(support_mean_normalized, -1, keepdim=True))
-    # # print("new supp mean norm: ", torch.linalg.norm(support_mean_normalized, -1, keepdim=True))
-
-    # support_mean_normalized /= torch.sum(support_mean_normalized, -1, keepdim=True) # 32, 5, 64
-
-    # # print("support: ", (support_mean_normalized[0] < 0).sum())
-
-    # # nirmalize query
-    # query_normalized = torch.abs(query)
-    # query_normalized /= torch.sum(query_normalized, -1, keepdim=True) # 32, 5, 64
-
-    # # print("query: ", (query_normalized[0] < 0).sum())
-
-    # test = entropy(support_mean_normalized.clone(), query_normalized.clone(), axis = -1)
-
-    # print(F.softmax(test, -1))
+        # nirmalize query
+        query_normalized = torch.abs(query)
+        query_normalized /= torch.sum(query_normalized, -1, keepdim=True) # 32, 5, 64
+    else:
+        support_mean_normalized = support_mean
+        query_normalized = query
 
 
-    # # log_support_mean_normalized = torch.log(support_mean_normalized)
-    # # log_query_normalized = torch.log(query_normalized)
+    log_support_mean_normalized = torch.log(support_mean_normalized)
+    log_query_normalized = torch.log(query_normalized)
 
-#   #   print("support log: ", (log_support_mean_normalized[0] < 0).sum())
-#   #   print("query llog: ", (log_query_normalized[0] < 0).sum())   
-# # # 
-#   #   a = query_normalized / support_mean_normalized
-
-#   #   print('a: ', (a[0] < 0).sum())
-
-#   #   # print(a[0])
-#   #   print('og query: ', query_normalized[0,0,:])
-#   #   print(query_normalized[0,0,:].sum())
-#   #   print('og support: ', support_mean_normalized[0,0,:])
-#   #   print(support_mean_normalized[0,0,:].sum())
-
-#   #   print(torch.log2(query_normalized[0,0,:] / support_mean_normalized[0,0,:]))
-
-#   #   print("actual")
-#   #   print(support_mean_normalized[0,0,:]  * torch.log2(query_normalized[0,0,:] / support_mean_normalized[0,0,:]))
+    log_ratio = log_query_normalized - log_support_mean_normalized # 32, 5, 64
 
 
+    #                               64,5,1,64  --> repeats: []
+    a_1 = support_mean_normalized.unsqueeze(2).repeat_interleave(5, dim=2) # --> [a, a, a, a,], [b, b, b,b ]
+    
+    #                 64,5,1,64 --> want [a, b, c, d, e] have [a, a, a, a], [b, b, b, b]
+    # a_2 = log_ratio.unsqueeze(2).expand(-1, -1, 5, -1) #64, 5, 5, 64
+    a_2 = log_ratio.unsqueeze(1).repeat(1, 5, 1, 1)
 
-    # # log_ratio = torch.log2(query_normalized / support_mean_normalized) 
-
-    # # log_ratio = log_query_normalized - log_support_mean_normalized # 32, 5, 64
-    # # print('log ratio hsape: ', torch.sum(log_ratio, -1))
-
-    # # print("qlog ratio: ", (log_ratio[0] < 0).sum())   
-
-    # # print(log_ratio[0])
-
-    # # k_dl =  - torch.sum(support_mean_normalized * log_ratio,-1)
-
-
-    # print(test)
-    # print(torch.max(F.softmax(test, -1), -1))
-    # 
-
-
-    # pdb.set_trace()
-
-
-    # print(a)
+    # z = torch.einsum('abcd, abde -> abce', a_1, a_2)
+    k_dl =  - torch.sum(a_1 * a_2, -1)
+    return k_dl
 
 
 
