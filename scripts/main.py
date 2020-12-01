@@ -18,7 +18,7 @@ from preprocess import preprocess
 from dataloader import OmniglotLoader, MiniImageNetLoader
 from prototypical import ProtoNet
 
-from learn2learn.data.transforms import NWays, KShots, LoadData, RemapLabels
+# from learn2learn.data.transforms import NWays, KShots, LoadData, RemapLabels
 
 
 QUERY_PER_CLASS = 1
