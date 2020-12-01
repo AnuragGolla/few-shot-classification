@@ -2,7 +2,7 @@ import torch
 import numpy as np
 import ot
 import neuralnet_pytorch as nnt 
-from emd import earth_mover_distance 
+from PyTorchEMD.emd import earth_mover_distance 
 
 import pdb
 
