@@ -2,7 +2,6 @@ scikit-image
 numpy
 tqdm
 torch
-learn2learn
 cpython
 POT
 neuralnet-pytorch
