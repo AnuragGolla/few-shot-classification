@@ -1,12 +1,12 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-# os.environ['CUDA_VISIBLE_DEVICES'] = '0' # Feel free to change for those with GPUs
+os.environ['CUDA_VISIBLE_DEVICES'] = '6' # Feel free to change for those with GPUs
 
 from distances.euclidean import euclidean_distance
 import pdb
 
-device = 'cpu'
+device = 'cuda'
 
 def conv_block(in_depth, out_depth, pool_size=1):
     return nn.Sequential(
