@@ -18,7 +18,6 @@ from preprocess import preprocess
 from dataloader import OmniglotLoader, MiniImageNetLoader
 from prototypical import ProtoNet
 
-import learn2learn as l2l
 from learn2learn.data.transforms import NWays, KShots, LoadData, RemapLabels
 
 
