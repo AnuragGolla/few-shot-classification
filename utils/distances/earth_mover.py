@@ -19,7 +19,4 @@ def emd_distance(support, support_mean, query):
 
     dist = dist.view(B, way, way)
 
-    pdb.set_trace()
-    ret = nnt.metrics.emd_loss(support_mean, query)
-    print(ret.shape)
-    return ret 
+    return -dist
