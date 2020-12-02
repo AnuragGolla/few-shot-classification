@@ -17,14 +17,14 @@ def emd_distance(support, support_mean, query):
     query_normalized = (query + torch.abs(torch.min(query, 2, keepdim=True).values)) / torch.max(query, 2, keepdim=True).values # 32, 5, 64
     query_normalized /= torch.sum(query_normalized, -1, keepdim=True) # 32, 5, 64    
 
-    support_mean_normalized = support_mean_normalized.unsqueeze(2).repeat(1,1,5,1) # 32, 5, 5, 64 # abc abc abc
-    query_normalized = query_normalized.unsqueeze(1).repeat_interleave(5, dim=1) # 32, 5, 5, 64  # aaa bbb ccc 
+    support_mean_normalized = support_mean_normalized.unsqueeze(1).repeat(1,5,1,1) # 32, 5, 5, 64 # abc abc abc
+    query_normalized = query_normalized.unsqueeze(2).repeat_interleave(5, dim=2) # 32, 5, 5, 64  # aaa bbb ccc 
 
-    pdb.set_trace()
 
     support_mean_normalized = support_mean_normalized.contiguous().view(B * way * way, 1, Depth) # 32, 25 64
     query_normalized = query_normalized.contiguous().view(B * way * way, 1, Depth) # 32, 25, 64
 
+    pdb.set_trace()
 
     dist = earth_mover_distance(support_mean_normalized, query_normalized, transpose=False)
 
