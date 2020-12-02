@@ -23,7 +23,10 @@ def emd_distance(support, support_mean, query):
     support_mean_normalized = support_mean_normalized.contiguous().view(B * way * way, 1, Depth) # 32, 25 64
     query_normalized = query_normalized.contiguous().view(B * way * way, 1, Depth) # 32, 25, 64
 
+
     dist = earth_mover_distance(support_mean_normalized, query_normalized, transpose=False)
+
+    pdb.set_trace()
 
     dist = dist.view(B, way, way)
 
