@@ -3,7 +3,7 @@ import numpy as np
 import ot
 import neuralnet_pytorch as nnt 
 from PyTorchEMD.emd import earth_mover_distance 
-from neuralnet_pytorch.metrics import emd_loss
+import neuralnet_pytorch as nnt
 
 import pdb
 
