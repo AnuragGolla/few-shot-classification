@@ -21,8 +21,6 @@ def emd_distance(support, support_mean, query):
     support_mean_normalized = support_mean_normalized.unsqueeze(1).repeat(1,5,1,1) # 32, 5, 5, 64 # abc abc abc
     query_normalized = query_normalized.unsqueeze(2).repeat_interleave(5, dim=2) # 32, 5, 5, 64  # aaa bbb ccc 
 
-    pdb.set_trace()
-
     support_mean_normalized = support_mean_normalized.contiguous().view(B * way * way, 1, Depth) # 800, 1 64
     query_normalized = query_normalized.contiguous().view(B * way * way, 1, Depth) # 800, 1 64
 
