@@ -10,11 +10,11 @@ def emd_distance(support, support_mean, query):
     B, way, shot, Depth = support.shape
 
     # normalize support mean
-    support_mean_normalized = (support_mean + torch.min(support_mean, 2, keepdim=True).values) / torch.max(support_mean, 2, keepdim=True).values # 32, 5, 64
+    support_mean_normalized = (support_mean + torch.abs(torch.min(support_mean, 2, keepdim=True).values)) / torch.max(support_mean, 2, keepdim=True).values # 32, 5, 64
     support_mean_normalized /= torch.sum(support_mean_normalized, -1, keepdim=True) # 32, 5, 64
 
     # normalize query
-    query_normalized = (query + torch.min(query, 2, keepdim=True).values) / torch.max(query, 2, keepdim=True).values # 32, 5, 64
+    query_normalized = (query + torch.abs(torch.min(query, 2, keepdim=True).values)) / torch.max(query, 2, keepdim=True).values # 32, 5, 64
     query_normalized /= torch.sum(query_normalized, -1, keepdim=True) # 32, 5, 64    
 
     support_mean_normalized = support_mean_normalized.unsqueeze(2).repeat(1,1,5,1) # 32, 5, 5, 64 # abc abc abc
