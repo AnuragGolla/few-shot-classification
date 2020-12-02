@@ -9,15 +9,21 @@ import pdb
 def emd_distance(support, support_mean, query):
     B, way, shot, Depth = support.shape
 
-    support_mean = support_mean.unsqueeze(2).repeat_interleave(5, dim=2) # 32, 5, 5, 64
-    query = query.unsqueeze(1).repeat(1, 5, 1, 1) # 32, 5, 5, 64
+    # normalize support mean
+    support_mean_normalized = torch.abs(support_mean) # 32, 5, 64
+    support_mean_normalized /= torch.sum(support_mean_normalized, -1, keepdim=True) # 32, 5, 64
 
-    support_mean = support_mean.contiguous().view(B, way*way, Depth) # 32, 25 64
-    query = query.contiguous().view(B, way * way, Depth) # 32, 25, 64
+    # normalize query
+    query_normalized = torch.abs(query) # 32, 5, 64
+    query_normalized /= torch.sum(query_normalized, -1, keepdim=True) # 32, 5, 64    
 
-    pdb.set_trace()
+    support_mean_normalized = support_mean_normalized.unsqueeze(2).repeat_interleave(5, dim=2) # 32, 5, 5, 64
+    query_normalized = query_normalized.unsqueeze(1).repeat(1, 5, 1, 1) # 32, 5, 5, 64
 
-    dist = earth_mover_distance(support_mean.cuda(), query.cuda(), transpose=False)
+    support_mean_normalized = support_mean_normalized.contiguous().view(B * way * way, 1, Depth) # 32, 25 64
+    query_normalized = query_normalized.contiguous().view(B * way * way, 1, Depth) # 32, 25, 64
+
+    dist = earth_mover_distance(support_mean_normalized, query_normalized, transpose=False)
 
     dist = dist.view(B, way, way)
 
